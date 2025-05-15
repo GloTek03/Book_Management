@@ -1,0 +1,57 @@
+package com.ltfullstack.borrowingservice.command.aggregate;
+
+import com.ltfullstack.borrowingservice.command.command.CreateBorrowingCommand;
+import com.ltfullstack.borrowingservice.command.command.DeleteBorrowingCommand;
+import com.ltfullstack.borrowingservice.command.event.BorrowingCreateEvent;
+import com.ltfullstack.borrowingservice.command.event.BorrowingDeleteEvent;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.axonframework.commandhandling.CommandHandler;
+import org.axonframework.eventsourcing.EventSourcingHandler;
+import org.axonframework.modelling.command.AggregateIdentifier;
+import org.axonframework.modelling.command.AggregateLifecycle;
+import org.axonframework.spring.stereotype.Aggregate;
+import org.springframework.beans.BeanUtils;
+
+import java.util.Date;
+
+@Aggregate
+@NoArgsConstructor
+@Getter
+@Setter
+public class BorrowingAggregate {
+    @AggregateIdentifier
+    private String id;
+    private String bookId;
+    private String employeeId;
+    private Date borrowingDate;
+    private Date returnDate;
+
+    @CommandHandler
+    public BorrowingAggregate(CreateBorrowingCommand command){
+        BorrowingCreateEvent event = new BorrowingCreateEvent();
+        BeanUtils.copyProperties(command, event);
+        AggregateLifecycle.apply(event);
+    }
+
+    @CommandHandler
+    public void handle(DeleteBorrowingCommand command){
+        BorrowingDeleteEvent event = new BorrowingDeleteEvent(command.getId());
+        AggregateLifecycle.apply(event);
+    }
+
+    @EventSourcingHandler
+    public void on(BorrowingCreateEvent event){
+        this.id = event.getId();
+        this.bookId = event.getBookId();
+        this.employeeId = event.getEmployeeId();
+        this.borrowingDate = event.getBorrowingDate();
+        this.returnDate = event.getReturnDate();
+    }
+
+    @EventSourcingHandler
+    public void on(BorrowingDeleteEvent event){
+        this.id = event.getId();
+    }
+}
