@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  eurekaservice:
+    build:
+      context: .
+      dockerfile: eurekaservice/Dockerfile
+    container_name: eurekaservice
+    ports:
+      - "8761:8761"
+    networks:
+      - microservice-networks
+  bookservice:
+    build:
+      context: .
+      dockerfile: bookservice/Dockerfile
+    container_name: bookservice
+    ports:
+      - "9001:9001"
+    networks:
+      - microservice-networks
+    depends_on:
+      - eurekaservice
+      - axonserver
+    environment:
+      - "AXONIQ_AXONSERVER_STANDALONE=true"
+  axonserver:
+    image: "axoniq/axonserver:latest"
+    hostname: axonserver
+    container_name: axonserver
+    environment:
+      - "AXONIQ_AXONSERVER_STANDALONE=true"
+    ports:
+      - "8024:8024"
+      - "8124:8124"
+      - "8224:8224"
+    networks:
+      - microservice-networks
+
+networks:
+  microservice-networks:
+    driver: bridge
