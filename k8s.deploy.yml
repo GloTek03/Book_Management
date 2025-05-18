@@ -1,0 +1,21 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: eurekaservice-deployment
+  labels:
+    app: eurekaservice
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: eurekaservice
+  template:
+    metadata:
+      labels:
+        app: eurekaservice
+    spec:
+      containers:
+      - name: eurekaservice
+        image: eurekaservice:latest
+        ports:
+        - containerPort: 8761

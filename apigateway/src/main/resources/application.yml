@@ -7,7 +7,7 @@ spring:
   data:
     redis:
       port: 6379
-      host: localhost
+      host: redis
   cloud:
     gateway:
       discovery:
@@ -25,12 +25,23 @@ spring:
                 redis-rate-limiter.burstCapacity: 20
                 redis-rate-limiter.requestedTokens: 1
             - name: KeyAuth
+        - id: bookservice
+          uri: lb://bookservice
+          predicates:
+            - Path=/api/v1/books/**
+          filters:
+            - name: RequestRateLimiter
+              args:
+                redis-rate-limiter.replenishRate: 10
+                redis-rate-limiter.burstCapacity: 20
+                redis-rate-limiter.requestedTokens: 1
+            - name: KeyAuth
 
 eureka:
   instance:
-    hostname: localhost
+    hostname: eurekaservice
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka
+      defaultZone: http://eurekaservice:8761/eureka
     register-with-eureka: true
     fetch-registry: true
