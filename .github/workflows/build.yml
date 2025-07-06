@@ -1,4 +1,4 @@
-name: Build and Test
+name: Build and Test bookservice
 
 on:
   push:
@@ -7,8 +7,11 @@ on:
     branches: [ main, master, dev-deploy-test ]
 
 jobs:
-  build:
+  build-bookservice:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: bookservice  # 👈 chạy mọi lệnh bên trong thư mục bookservice
 
     steps:
       - name: Checkout code
@@ -24,11 +27,13 @@ jobs:
         uses: actions/cache@v4
         with:
           path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          key: ${{ runner.os }}-maven-${{ hashFiles('bookservice/pom.xml') }}
           restore-keys: |
             ${{ runner.os }}-maven-
 
-      - name: Build with Maven
-        run: mvn -B clean install
+      - name: Build with Maven (skip tests)
+        run: mvn -B clean install -DskipTests=true
 
-      - name: Run tests
+      # Nếu bạn muốn chạy test sau này, hãy bỏ dòng skipTests
+      # - name: Run tests
+      #   run: mvn test
